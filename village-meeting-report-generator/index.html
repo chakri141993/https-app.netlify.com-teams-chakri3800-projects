@@ -72,38 +72,52 @@ function pageHtml(v,i){const showHead=document.getElementById('repeatHeadings').
 function renderPreview(){const root=document.getElementById('previewArea');if(!villages.length){root.innerHTML='<p class="muted">Add at least one village.</p>';return}root.innerHTML=villages.map(pageHtml).join('');}
 function preparePrint(){renderPreview();setTimeout(()=>window.print(),350);}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function downloadHTML(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='village-meeting-report-generator.html';a.click();URL.revokeObjectURL(a.href);}
-function dataUrlToUint8(dataUrl){const b64=dataUrl.split(',')[1]||'';const bin=atob(b64);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return arr;}
+function downloadHTML(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='village-meeting-report-generator.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function dataUrlToUint8(dataUrl){const parts=String(dataUrl||'').split(',');if(parts.length<2)throw new Error('Invalid image data');const bin=atob(parts[1]);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return arr;}
 function loadImageSize(src){return new Promise(resolve=>{const img=new Image();img.onload=()=>resolve({w:img.naturalWidth||1,h:img.naturalHeight||1});img.onerror=()=>resolve({w:1,h:1});img.src=src;});}
-function fitSize(w,h,maxW,maxH){const r=Math.min(maxW/w,maxH/h);return {width:Math.max(20,Math.round(w*r)),height:Math.max(20,Math.round(h*r))};}
+function fitSize(w,h,maxW,maxH){const r=Math.min(maxW/w,maxH/h);return {width:Math.max(40,Math.round(w*r)),height:Math.max(40,Math.round(h*r))};}
 async function downloadWord(){
- if(!villages.length){alert('Please add at least one village page.');return;}
- if(!window.docx){alert('Word generator is still loading. Please wait 2 seconds and try again.');return;}
- const {Document,Packer,Paragraph,TextRun,ImageRun,AlignmentType,PageBreak,Table,TableRow,TableCell,WidthType,BorderStyle}=window.docx;
- const children=[];
- for(let i=0;i<villages.length;i++){
-  const v=villages[i];
-  if(i>0)children.push(new Paragraph({children:[new PageBreak()]}));
-  const showHead=document.getElementById('repeatHeadings').value==='yes'||i===0;
-  children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:120},children:[new TextRun({text:showHead?(valueFor(v,'meetingTitle')||'Village Meeting Report'):v.name,bold:true,size:32})]}));
-  if(showHead){const lines=[`Village / GP: ${v.name}`,`Type of Meeting: ${valueFor(v,'meetingType')||''}`,`Meeting Date: ${fmtDate(valueFor(v,'meetingDate'))}`,`Mandal: ${valueFor(v,'mandal')||''}`,`District: ${valueFor(v,'district')||''}`,`Other: ${valueFor(v,'other')||''}`];children.push(new Paragraph({spacing:{after:160},children:[new TextRun({text:lines.join('   |   '),size:18})]}));}
-  const rows=[];let idx=0;const rowCount=Math.ceil(v.count/2);const maxW=270,maxH=Math.max(110,Math.floor(500/rowCount));
-  for(let r=0;r<rowCount;r++){
-   const cells=[];
-   for(let c=0;c<2;c++){
-    const p=idx++;let content=[];
-    if(p<v.count&&v.photos[p]){const sz=await loadImageSize(v.photos[p]);const fit=fitSize(sz.w,sz.h,maxW,maxH);content=[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:dataUrlToUint8(v.photos[p]),transformation:{width:fit.width,height:fit.height}})]})];}
-    else if(p<v.count)content=[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:`Photo ${p+1}`,size:18,color:'777777'})]})];
-    cells.push(new TableCell({width:{size:50,type:WidthType.PERCENTAGE},children:content,borders:{top:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},bottom:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},left:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},right:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'}}}));
+ try{
+  if(!villages.length){alert('Please add at least one village page.');return;}
+  if(!window.docx){alert('Word generator is still loading. Please wait 2 seconds and try again.');return;}
+  const {Document,Packer,Paragraph,TextRun,ImageRun,AlignmentType,PageBreak,Table,TableRow,TableCell,WidthType,BorderStyle}=window.docx;
+  const children=[];
+  for(let i=0;i<villages.length;i++){
+   const v=villages[i];
+   if(i>0)children.push(new Paragraph({children:[new PageBreak()]}));
+   const showHead=document.getElementById('repeatHeadings').value==='yes'||i===0;
+   children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:120},children:[new TextRun({text:showHead?(valueFor(v,'meetingTitle')||'Village Meeting Report'):v.name,bold:true,size:30})]}));
+   if(showHead){
+    const lines=[`Village / GP: ${v.name}`,`Type of Meeting: ${valueFor(v,'meetingType')||''}`,`Meeting Date: ${fmtDate(valueFor(v,'meetingDate'))}`,`Mandal: ${valueFor(v,'mandal')||''}`,`District: ${valueFor(v,'district')||''}`,`Other: ${valueFor(v,'other')||''}`];
+    children.push(new Paragraph({spacing:{after:160},children:[new TextRun({text:lines.join('   |   '),size:18})]}));
    }
-   rows.push(new TableRow({children:cells}));
+   const rows=[];let idx=0;const rowCount=Math.ceil(v.count/2);const maxW=270,maxH=Math.max(120,Math.floor(500/rowCount));
+   for(let r=0;r<rowCount;r++){
+    const cells=[];
+    for(let c=0;c<2;c++){
+     const p=idx++;let cellChildren=[];
+     if(p<v.count&&v.photos[p]){
+      const sz=await loadImageSize(v.photos[p]);
+      const fit=fitSize(sz.w,sz.h,maxW,maxH);
+      const bytes=dataUrlToUint8(v.photos[p]);
+      cellChildren=[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:bytes,transformation:{width:fit.width,height:fit.height}})]})];
+     }else if(p<v.count){
+      cellChildren=[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:`Photo ${p+1}`,size:18})]})];
+     }else{cellChildren=[new Paragraph({children:[]})];}
+     cells.push(new TableCell({width:{size:4500,type:WidthType.DXA},children:cellChildren,verticalAlign:'center',borders:{top:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},bottom:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},left:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},right:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'}}}));
+    }
+    rows.push(new TableRow({children:cells}));
+   }
+   children.push(new Table({width:{size:9000,type:WidthType.DXA},columnWidths:[4500,4500],rows}));
   }
-  children.push(new Table({width:{size:100,type:WidthType.PERCENTAGE},rows}));
- }
- const doc=new Document({sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:500,right:500,bottom:500,left:500}}},children}]});
- const blob=await Packer.toBlob(doc);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Village-Meeting-Photo-Report.docx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  const doc=new Document({creator:'Village Meeting Photo Report Generator',title:'Village Meeting Photo Report',description:'Village meeting photo report',sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:720,right:720,bottom:720,left:720}}},children}]});
+  const blob=await Packer.toBlob(doc);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='Village-Meeting-Photo-Report.docx';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+ }catch(err){console.error(err);alert('Word file could not be created. Please try again after the page finishes loading.');}
 }
-document.getElementById('meetingDate').value=new Date().toISOString().slice(0,10);renderVillageForms();
+renderVillageForms();
 </script>
 </body>
 </html>
