@@ -13,6 +13,7 @@ header h1{margin:0;font-size:22px}.wrap{max-width:1200px;margin:20px auto;paddin
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 label{font-weight:700;font-size:13px;display:block}input,select,textarea{width:100%;padding:10px;margin-top:5px;border:1px solid #ccd2d9;border-radius:7px;font-size:14px}
 textarea{min-height:70px;resize:vertical}.btn{border:0;border-radius:7px;padding:10px 15px;cursor:pointer;font-weight:700}.primary{background:#17365d;color:#fff}.green{background:#198754;color:#fff}.danger{background:#c62828;color:#fff}.light{background:#e9eef5}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.addBelow{display:flex;justify-content:center;margin-top:18px;padding-top:14px;border-top:1px solid #e1e5ea}.addBelow .btn{font-size:16px;padding:12px 24px}
 .village{border:1px solid #d6dbe1;border-radius:10px;padding:15px;margin-top:14px}.vhead{display:flex;justify-content:space-between;gap:10px;align-items:center}.vhead h3{margin:0}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photoBox{border:1px dashed #aab2bc;border-radius:8px;padding:8px;text-align:center;background:#fafafa}.photoBox img{width:100%;height:120px;object-fit:contain;background:#eee;border-radius:5px;margin-top:6px}.muted{color:#667085;font-size:12px}
 #previewArea{display:flex;flex-direction:column;align-items:center;gap:18px}
@@ -24,19 +25,7 @@ textarea{min-height:70px;resize:vertical}.btn{border:0;border-radius:7px;padding
 .photoPlaceholder{color:#777;font-size:13px}
 @media(max-width:850px){.page{transform:scale(.8);transform-origin:top center;margin-bottom:-220px}.photos{grid-template-columns:1fr}.details{grid-template-columns:1fr}}
 @page{size:A4 portrait;margin:0}
-@media print{
- body{background:#fff!important;margin:0!important;padding:0!important}
- .noPrint,header,.controls{display:none!important}
- .wrap{max-width:none;margin:0!important;padding:0!important}
- .card{box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}
- .preview-card>h2{display:none!important}
- #previewArea{display:block!important;margin:0!important;padding:0!important}
- .page{width:210mm!important;height:297mm!important;min-height:297mm!important;margin:0!important;padding:8mm!important;border:1.5mm solid #222!important;box-shadow:none!important;page-break-after:always!important;break-after:page!important;overflow:hidden!important}
- .page:last-child{page-break-after:auto!important;break-after:auto!important}
- .page h2{font-size:18pt!important;margin:0 0 4mm!important}.details{font-size:10pt!important;gap:2mm 6mm!important;margin-bottom:4mm!important}
- .photoGrid{gap:2mm!important;min-height:0!important;overflow:hidden!important}
- .photoGrid .photoCell{overflow:hidden!important;background:#f7f7f7!important}.photoGrid .photoCell img{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important}
-}
+@media print{body{background:#fff!important;margin:0!important;padding:0!important}.noPrint,header,.controls{display:none!important}.wrap{max-width:none;margin:0!important;padding:0!important}.card{box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}.preview-card>h2{display:none!important}#previewArea{display:block!important;margin:0!important;padding:0!important}.page{width:210mm!important;height:297mm!important;min-height:297mm!important;margin:0!important;padding:8mm!important;border:1.5mm solid #222!important;box-shadow:none!important;page-break-after:always!important;break-after:page!important;overflow:hidden!important}.page:last-child{page-break-after:auto!important;break-after:auto!important}.page h2{font-size:18pt!important;margin:0 0 4mm!important}.details{font-size:10pt!important;gap:2mm 6mm!important;margin-bottom:4mm!important}.photoGrid{gap:2mm!important;min-height:0!important;overflow:hidden!important}.photoGrid .photoCell{overflow:hidden!important;background:#f7f7f7!important}.photoGrid .photoCell img{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important}}
 </style>
 </head>
 <body>
@@ -58,24 +47,23 @@ textarea{min-height:70px;resize:vertical}.btn{border:0;border-radius:7px;padding
 <div><label>Default Photos per Page</label><select id="defaultPhotoCount"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
 </div>
 <div class="actions">
-<button class="btn primary" onclick="addVillage()">+ Add Village / Page</button>
 <button class="btn green" onclick="renderPreview()">Preview Report</button>
 <button class="btn light" onclick="preparePrint()">Print / Save as PDF</button>
 <button class="btn green" onclick="downloadWord()">Download Word (.docx)</button>
 <button class="btn light" onclick="downloadHTML()">Save Project</button>
 </div>
 </section>
-<section class="card controls"><h2>Village Pages</h2><div id="villages"></div></section>
+<section class="card controls"><h2>Village Pages</h2><div id="villages"></div><div class="addBelow"><button class="btn primary" onclick="addVillage()">＋ Add Village / Page</button></div></section>
 <section class="card preview-card"><h2>Preview</h2><div id="previewArea"><p class="muted">Add a village and click Preview Report.</p></div></section>
 </div>
 <script>
 let villages=[];
 function common(){return {meetingType:document.getElementById('meetingType').value,meetingTitle:document.getElementById('meetingTitle').value,meetingDate:document.getElementById('meetingDate').value,mandal:document.getElementById('mandal').value,district:document.getElementById('district').value,other:document.getElementById('commonOther').value};}
-function addVillage(){const count=+document.getElementById('defaultPhotoCount').value;villages.push({name:'',count,photos:Array(count).fill(null),override:{meetingType:false,meetingTitle:false,meetingDate:false,mandal:false,district:false,other:false},vals:{}});renderVillageForms();}
+function addVillage(){const count=+document.getElementById('defaultPhotoCount').value;villages.push({name:'',count,photos:Array(count).fill(null),override:{meetingType:false,meetingTitle:false,meetingDate:false,mandal:false,district:false,other:false},vals:{}});renderVillageForms();setTimeout(()=>{document.querySelector('#villages .village:last-of-type')?.scrollIntoView({behavior:'smooth',block:'center'});},50);}
 function removeVillage(i){villages.splice(i,1);renderVillageForms();renderPreview();}
 function update(i,key,val){villages[i][key]=val;}
 function setPhotoCount(i,val){villages[i].count=+val;villages[i].photos=Array.from({length:+val},(_,k)=>villages[i].photos[k]||null);renderVillageForms();}
-function renderVillageForms(){const root=document.getElementById('villages');if(!villages.length){root.innerHTML='<p class="muted">No village pages added yet.</p>';return}root.innerHTML=villages.map((v,i)=>`<div class="village"><div class="vhead"><h3>Page ${i+1}</h3><button class="btn danger" onclick="removeVillage(${i})">Remove</button></div><div class="grid" style="margin-top:10px"><div><label>GP / Village Name</label><input value="${esc(v.name)}" oninput="update(${i},'name',this.value)" placeholder="e.g. Chimanapalli"></div><div><label>Photos on this page</label><select onchange="setPhotoCount(${i},this.value)">${[1,2,3,4,5,6].map(n=>`<option ${v.count==n?'selected':''}>${n}</option>`).join('')}</select></div></div><details style="margin-top:12px"><summary><b>Override common details for this page</b></summary>${overrideField(i,'meetingType','Type of Meeting')}${overrideField(i,'meetingTitle','Meeting Title')}${overrideField(i,'meetingDate','Meeting Date','date')}${overrideField(i,'mandal','Mandal')}${overrideField(i,'district','District')}${overrideField(i,'other','Other Details')}</details><div class="photos">${Array.from({length:v.count},(_,p)=>`<div class="photoBox"><b>Photo ${p+1}</b><input type="file" accept="image/*" onchange="photoUpload(${i},${p},this.files[0])">${v.photos[p]?`<img src="${v.photos[p]}" alt="Photo ${p+1}">`:''}</div>`).join('')}</div></div>`).join('');}
+function renderVillageForms(){const root=document.getElementById('villages');if(!villages.length){root.innerHTML='<p class="muted">No village pages added yet. Click “＋ Add Village / Page” below.</p>';return}root.innerHTML=villages.map((v,i)=>`<div class="village"><div class="vhead"><h3>Page ${i+1}</h3><button class="btn danger" onclick="removeVillage(${i})">Remove</button></div><div class="grid" style="margin-top:10px"><div><label>GP / Village Name</label><input value="${esc(v.name)}" oninput="update(${i},'name',this.value)" placeholder="e.g. Chimanapalli"></div><div><label>Photos on this page</label><select onchange="setPhotoCount(${i},this.value)">${[1,2,3,4,5,6].map(n=>`<option ${v.count==n?'selected':''}>${n}</option>`).join('')}</select></div></div><details style="margin-top:12px"><summary><b>Override common details for this page</b></summary>${overrideField(i,'meetingType','Type of Meeting')}${overrideField(i,'meetingTitle','Meeting Title')}${overrideField(i,'meetingDate','Meeting Date','date')}${overrideField(i,'mandal','Mandal')}${overrideField(i,'district','District')}${overrideField(i,'other','Other Details')}</details><div class="photos">${Array.from({length:v.count},(_,p)=>`<div class="photoBox"><b>Photo ${p+1}</b><input type="file" accept="image/*" onchange="photoUpload(${i},${p},this.files[0])">${v.photos[p]?`<img src="${v.photos[p]}" alt="Photo ${p+1}">`:''}</div>`).join('')}</div></div>`).join('');}
 function overrideField(i,key,label,type='text'){const v=villages[i],checked=v.override[key];return `<div style="display:grid;grid-template-columns:180px 1fr;gap:8px;align-items:center;margin-top:8px"><label><input type="checkbox" ${checked?'checked':''} onchange="villages[${i}].override.${key}=this.checked;renderVillageForms()"> Override ${label}</label><input type="${type}" value="${esc(v.vals[key]||'')}" ${checked?'':'disabled'} oninput="villages[${i}].vals.${key}=this.value"></div>`;}
 function photoUpload(i,p,file){if(!file)return;const reader=new FileReader();reader.onload=e=>{villages[i].photos[p]=e.target.result;renderVillageForms();renderPreview();};reader.readAsDataURL(file);}
 function valueFor(v,key){return v.override[key]?v.vals[key]:common()[key];}
@@ -98,30 +86,24 @@ async function downloadWord(){
   if(i>0)children.push(new Paragraph({children:[new PageBreak()]}));
   const showHead=document.getElementById('repeatHeadings').value==='yes'||i===0;
   children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:120},children:[new TextRun({text:showHead?(valueFor(v,'meetingTitle')||'Village Meeting Report'):v.name,bold:true,size:32})]}));
-  if(showHead){
-   const lines=[`Village / GP: ${v.name}`,`Type of Meeting: ${valueFor(v,'meetingType')||''}`,`Meeting Date: ${fmtDate(valueFor(v,'meetingDate'))}`,`Mandal: ${valueFor(v,'mandal')||''}`,`District: ${valueFor(v,'district')||''}`,`Other: ${valueFor(v,'other')||''}`];
-   children.push(new Paragraph({spacing:{after:180},children:[new TextRun({text:lines.join('   |   '),size:20})]}));
-  }
-  const rows=[];const cols=2;let idx=0;
-  const rowCount=Math.ceil(v.count/2);
-  const maxW=280,maxH=Math.max(110,Math.floor(500/rowCount));
+  if(showHead){const lines=[`Village / GP: ${v.name}`,`Type of Meeting: ${valueFor(v,'meetingType')||''}`,`Meeting Date: ${fmtDate(valueFor(v,'meetingDate'))}`,`Mandal: ${valueFor(v,'mandal')||''}`,`District: ${valueFor(v,'district')||''}`,`Other: ${valueFor(v,'other')||''}`];children.push(new Paragraph({spacing:{after:160},children:[new TextRun({text:lines.join('   |   '),size:18})]}));}
+  const rows=[];let idx=0;const rowCount=Math.ceil(v.count/2);const maxW=270,maxH=Math.max(110,Math.floor(500/rowCount));
   for(let r=0;r<rowCount;r++){
    const cells=[];
-   for(let c=0;c<cols;c++){
+   for(let c=0;c<2;c++){
     const p=idx++;let content=[];
     if(p<v.count&&v.photos[p]){const sz=await loadImageSize(v.photos[p]);const fit=fitSize(sz.w,sz.h,maxW,maxH);content=[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:dataUrlToUint8(v.photos[p]),transformation:{width:fit.width,height:fit.height}})]})];}
-    else if(p<v.count){content=[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:`Photo ${p+1}`,color:'777777',size:18})]})];}
-    else content=[new Paragraph({children:[]})];
-    cells.push(new TableCell({width:{size:4500,type:WidthType.DXA},children:content,verticalAlign:'center'}));
+    else if(p<v.count)content=[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:`Photo ${p+1}`,size:18,color:'777777'})]})];
+    cells.push(new TableCell({width:{size:50,type:WidthType.PERCENTAGE},children:content,borders:{top:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},bottom:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},left:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'},right:{style:BorderStyle.SINGLE,size:4,color:'BFBFBF'}}}));
    }
    rows.push(new TableRow({children:cells}));
   }
-  children.push(new Table({width:{size:9000,type:WidthType.DXA},rows,borders:{top:{style:BorderStyle.SINGLE,size:4,color:'BDBDBD'},bottom:{style:BorderStyle.SINGLE,size:4,color:'BDBDBD'},left:{style:BorderStyle.SINGLE,size:4,color:'BDBDBD'},right:{style:BorderStyle.SINGLE,size:4,color:'BDBDBD'},insideHorizontal:{style:BorderStyle.SINGLE,size:4,color:'D9D9D9'},insideVertical:{style:BorderStyle.SINGLE,size:4,color:'D9D9D9'}}}));
+  children.push(new Table({width:{size:100,type:WidthType.PERCENTAGE},rows}));
  }
- const doc=new Document({sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:560,right:560,bottom:560,left:560}}},children}]});
- try{const blob=await Packer.toBlob(doc);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Village_Meeting_Photo_Report.docx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}catch(e){console.error(e);downloadWordFallback();}
+ const doc=new Document({sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:500,right:500,bottom:500,left:500}}},children}]});
+ const blob=await Packer.toBlob(doc);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Village-Meeting-Photo-Report.docx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-function downloadWordFallback(){const pages=villages.map(pageHtml).join('<div style="page-break-after:always"></div>');const html=`<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:10mm}.page{width:190mm;height:277mm;border:1px solid #222;padding:8mm;box-sizing:border-box;page-break-after:always}.page img{max-width:100%;max-height:100%;object-fit:contain}.photoGrid{display:grid;grid-template-columns:1fr 1fr;gap:5mm;height:220mm}.photoCell{display:flex;align-items:center;justify-content:center;border:1px solid #ccc}</style></head><body>${pages}</body></html>`;const blob=new Blob([html],{type:'application/msword'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Village_Meeting_Photo_Report.doc';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}
 document.getElementById('meetingDate').value=new Date().toISOString().slice(0,10);renderVillageForms();
 </script>
-</body></html>
+</body>
+</html>
