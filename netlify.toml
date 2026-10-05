@@ -1,0 +1,5 @@
+[build]
+  publish = "village-meeting-report-generator"
+
+[build.processing]
+  skip_processing = true
